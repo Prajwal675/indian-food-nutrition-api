@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="search-form">
+    <form action="/search" method="GET">
+        <div class="form-group">
+            <label for="dish">Search for a dish:</label>
+            <input type="text" id="dish" name="dish" placeholder="Enter dish name (e.g., Naan, Chapati/Roti)" required>
+        </div>
+        <button type="submit" class="btn">Search Nutrition</button>
+    </form>
+</div>
+
+{% if popular_dishes %}
+<div class="popular-dishes">
+    <h3>Popular Dishes:</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
+        {% for dish in popular_dishes %}
+        <a href="/search?dish={{ dish|urlencode }}" class="btn btn-secondary" style="text-decoration: none; text-align: center;">
+            {{ dish }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div style="margin-top: 40px; padding: 20px; background: #e3f2fd; border-radius: 10px;">
+    <h3>How to use:</h3>
+    <ul style="margin-left: 20px; margin-top: 10px;">
+        <li>Type the name of any Indian dish in the search box</li>
+        <li>Use exact names for best results (e.g., "Chapati/Roti" not "Chapati Roti")</li>
+        <li>Search is case-insensitive</li>
+        <li>Click on popular dishes for quick access</li>
+    </ul>
+</div>
+
+<script>
+// Add autocomplete functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const dishInput = document.getElementById('dish');
+    let timeout;
+    
+    dishInput.addEventListener('input', function() {
+        clearTimeout(timeout);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            hideSuggestions();
+            return;
+        }
+        
+        timeout = setTimeout(() => {
+            fetchSuggestions(query);
+        }, 300);
+    });
+    
+    function fetchSuggestions(query) {
+        fetch(`/api/suggestions?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.suggestions && data.suggestions.length > 0) {
+                    showSuggestions(data.suggestions);
+                } else {
+                    hideSuggestions();
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching suggestions:', error);
+                hideSuggestions();
+            });
+    }
+    
+    function showSuggestions(suggestions) {
+        hideSuggestions(); // Remove existing suggestions
+        
+        const suggestionsDiv = document.createElement('div');
+        suggestionsDiv.id = 'suggestions';
+        suggestionsDiv.style.cssText = `
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            width: ${dishInput.offsetWidth}px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        `;
+        
+        suggestions.forEach(suggestion => {
+            const item = document.createElement('div');
+            item.textContent = suggestion;
+            item.style.cssText = `
+                padding: 10px;
+                cursor: pointer;
+                border-bottom: 1px solid #eee;
+            `;
+            item.addEventListener('mouseenter', () => {
+                item.style.backgroundColor = '#f0f0f0';
+            });
+            item.addEventListener('mouseleave', () => {
+                item.style.backgroundColor = 'white';
+            });
+            item.addEventListener('click', () => {
+                dishInput.value = suggestion;
+                hideSuggestions();
+            });
+            suggestionsDiv.appendChild(item);
+        });
+        
+        dishInput.parentNode.style.position = 'relative';
+        dishInput.parentNode.appendChild(suggestionsDiv);
+    }
+    
+    function hideSuggestions() {
+        const existing = document.getElementById('suggestions');
+        if (existing) {
+            existing.remove();
+        }
+    }
+    
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!dishInput.contains(e.target)) {
+            hideSuggestions();
+        }
+    });
+});
+</script>
+{% endblock %}

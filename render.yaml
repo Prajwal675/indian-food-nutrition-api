@@ -1,0 +1,22 @@
+databases:
+  - name: foodapi-db
+    databaseName: foodapi
+    user: foodapi
+
+services:
+  - type: web
+    name: indian-food-nutrition-api
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn foodapi.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: foodapi-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+      - key: DJANGO_SETTINGS_MODULE
+        value: foodapi.render_settings

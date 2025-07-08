@@ -1,0 +1,251 @@
+{
+	"info": {
+		"_postman_id": "12345678-1234-1234-1234-123456789012",
+		"name": "Indian Food Nutrition API",
+		"description": "API for accessing nutritional information of Indian food dishes",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Welcome Message",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						""
+					]
+				},
+				"description": "Returns a welcome message from the API"
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Foods",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/foods/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"foods",
+						""
+					]
+				},
+				"description": "Returns a list of all available food dishes"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Food Nutrition - Hot Tea",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/food/Hot tea (Garam Chai)/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"food",
+						"Hot tea (Garam Chai)",
+						""
+					]
+				},
+				"description": "Returns nutritional information for Hot tea (Garam Chai)"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Food Nutrition - Case Insensitive",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/food/hot tea (garam chai)/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"food",
+						"hot tea (garam chai)",
+						""
+					]
+				},
+				"description": "Tests case-insensitive search for the same dish"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Food Nutrition - Naan",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/food/Naan/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"food",
+						"Naan",
+						""
+					]
+				},
+				"description": "Returns nutritional information for Naan"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Food Nutrition - Masala Dosa",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/food/Masala dosa/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"food",
+						"Masala dosa",
+						""
+					]
+				},
+				"description": "Returns nutritional information for Masala dosa"
+			},
+			"response": []
+		},
+		{
+			"name": "Test 404 - Nonexistent Dish",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/food/nonexistent dish/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"food",
+						"nonexistent dish",
+						""
+					]
+				},
+				"description": "Tests 404 error handling for non-existent dishes"
+			},
+			"response": []
+		},
+		{
+			"name": "Search - Chapati/Roti (Special Characters)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/search/?dish=Chapati/Roti",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"search",
+						""
+					],
+					"query": [
+						{
+							"key": "dish",
+							"value": "Chapati/Roti"
+						}
+					]
+				},
+				"description": "Search for dishes with special characters using query parameter"
+			},
+			"response": []
+		},
+		{
+			"name": "Search - Case Insensitive",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:8000/api/search/?dish=chapati/roti",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"search",
+						""
+					],
+					"query": [
+						{
+							"key": "dish",
+							"value": "chapati/roti"
+						}
+					]
+				},
+				"description": "Tests case-insensitive search with special characters"
+			},
+			"response": []
+		}
+	]
+}

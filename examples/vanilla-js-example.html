@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Food Nutrition Finder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .search-section {
+            margin-bottom: 30px;
+        }
+        input, select, button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .nutrition-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .nutrition-item {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .nutrition-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .nutrition-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .loading {
+            text-align: center;
+            color: #007bff;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍛 Indian Food Nutrition Finder</h1>
+        
+        <div class="search-section">
+            <h3>Search for Food Nutrition</h3>
+            <div>
+                <input type="text" id="dishInput" placeholder="Enter dish name (e.g., Naan, Chapati/Roti)" style="width: 300px;">
+                <button onclick="searchFood()">Search</button>
+            </div>
+            <div style="margin-top: 10px;">
+                <select id="dishSelect" style="width: 320px;">
+                    <option value="">Or select from popular dishes...</option>
+                </select>
+                <button onclick="searchSelectedFood()">Get Nutrition</button>
+            </div>
+            <button onclick="loadAllFoods()" style="margin-top: 10px;">Load All Available Foods</button>
+        </div>
+
+        <div id="results" class="results" style="display: none;">
+            <h3 id="dishName"></h3>
+            <div id="nutritionData" class="nutrition-grid"></div>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="loading" class="loading" style="display: none;">Loading...</div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'http://127.0.0.1:8000/api';
+        
+        // Popular dishes for the dropdown
+        const popularDishes = [
+            'Naan', 'Chapati/Roti', 'Masala dosa', 'Idli', 'Hot tea (Garam Chai)',
+            'Makki ki roti', 'Sambar', 'Rajmah curry', 'Aloo gobhi', 'Biryani'
+        ];
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            populateDropdown();
+            
+            // Allow Enter key to search
+            document.getElementById('dishInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchFood();
+                }
+            });
+        });
+
+        // Populate the dropdown with popular dishes
+        function populateDropdown() {
+            const select = document.getElementById('dishSelect');
+            popularDishes.forEach(dish => {
+                const option = document.createElement('option');
+                option.value = dish;
+                option.textContent = dish;
+                select.appendChild(option);
+            });
+        }
+
+        // Search for food nutrition
+        async function searchFood() {
+            const dishName = document.getElementById('dishInput').value.trim();
+            if (!dishName) {
+                showError('Please enter a dish name');
+                return;
+            }
+            await fetchNutritionData(dishName);
+        }
+
+        // Search for selected food from dropdown
+        async function searchSelectedFood() {
+            const dishName = document.getElementById('dishSelect').value;
+            if (!dishName) {
+                showError('Please select a dish from the dropdown');
+                return;
+            }
+            document.getElementById('dishInput').value = dishName;
+            await fetchNutritionData(dishName);
+        }
+
+        // Fetch nutrition data from API
+        async function fetchNutritionData(dishName) {
+            showLoading(true);
+            hideError();
+            hideResults();
+
+            try {
+                // Use search endpoint for better compatibility with special characters
+                const response = await fetch(`${API_BASE_URL}/search/?dish=${encodeURIComponent(dishName)}`);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error(`Dish "${dishName}" not found. Please check the spelling or try a different dish.`);
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayNutritionData(dishName, data[dishName]);
+                
+            } catch (error) {
+                console.error('Error fetching nutrition data:', error);
+                showError(error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Display nutrition data
+        function displayNutritionData(dishName, nutritionData) {
+            document.getElementById('dishName').textContent = dishName;
+            
+            const nutritionGrid = document.getElementById('nutritionData');
+            nutritionGrid.innerHTML = '';
+
+            // Create nutrition items
+            Object.entries(nutritionData).forEach(([key, value]) => {
+                const item = document.createElement('div');
+                item.className = 'nutrition-item';
+                
+                item.innerHTML = `
+                    <div class="nutrition-value">${value}</div>
+                    <div class="nutrition-label">${key}</div>
+                `;
+                
+                nutritionGrid.appendChild(item);
+            });
+
+            showResults();
+        }
+
+        // Load all available foods (for reference)
+        async function loadAllFoods() {
+            showLoading(true);
+            hideError();
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/foods/`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('All available foods:', data.foods);
+                alert(`Loaded ${data.foods.length} foods. Check the browser console for the full list.`);
+                
+            } catch (error) {
+                console.error('Error loading foods:', error);
+                showError('Failed to load foods list');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Utility functions
+        function showResults() {
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function hideResults() {
+            document.getElementById('results').style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>
