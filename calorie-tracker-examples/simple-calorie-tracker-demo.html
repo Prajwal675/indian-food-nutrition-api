@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Food Calorie Tracker Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .progress-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .calorie-display {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e1e5e9;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            transition: width 0.3s ease;
+        }
+        
+        .add-food-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .popular-foods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .popular-food-btn {
+            background: white;
+            border: 2px solid #e1e5e9;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .popular-food-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .food-log {
+            margin-top: 30px;
+        }
+        
+        .meal-section {
+            margin-bottom: 25px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .meal-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            text-transform: capitalize;
+        }
+        
+        .food-entry {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .food-info {
+            flex: 1;
+        }
+        
+        .food-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .food-details {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .food-calories {
+            font-weight: bold;
+            color: #667eea;
+            margin-right: 15px;
+        }
+        
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-style: italic;
+            padding: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .popular-foods {
+                grid-template-columns: 1fr;
+            }
+            
+            .food-entry {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .food-calories {
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ Indian Food Calorie Tracker</h1>
+            <p>Track your daily nutrition with authentic Indian dishes</p>
+        </div>
+        
+        <div class="content">
+            <!-- Progress Section -->
+            <div class="progress-section">
+                <div class="calorie-display" id="calorieDisplay">0 / 2000 calories</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <p id="progressText">Start adding foods to track your daily intake!</p>
+            </div>
+            
+            <!-- Add Food Section -->
+            <div class="add-food-section">
+                <h3>🔍 Add Food to Your Log</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="foodSearch">Search for a dish:</label>
+                        <input type="text" id="foodSearch" placeholder="Type dish name (e.g., Naan, Chapati/Roti)">
+                    </div>
+                    <div class="form-group">
+                        <label for="servings">Servings:</label>
+                        <input type="number" id="servings" value="1" min="0.1" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="mealType">Meal:</label>
+                        <select id="mealType">
+                            <option value="breakfast">Breakfast</option>
+                            <option value="lunch">Lunch</option>
+                            <option value="dinner">Dinner</option>
+                            <option value="snack">Snack</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button class="btn" onclick="addFood()" id="addBtn">Add Food</button>
+                    </div>
+                </div>
+                
+                <div id="error" class="error" style="display: none;"></div>
+                <div id="loading" class="loading" style="display: none;">Searching for food...</div>
+                
+                <h4 style="margin-top: 25px; margin-bottom: 15px;">🌟 Popular Indian Dishes:</h4>
+                <div class="popular-foods">
+                    <button class="popular-food-btn" onclick="quickAdd('Naan')">Naan</button>
+                    <button class="popular-food-btn" onclick="quickAdd('Chapati/Roti')">Chapati/Roti</button>
+                    <button class="popular-food-btn" onclick="quickAdd('Masala dosa')">Masala dosa</button>
+                    <button class="popular-food-btn" onclick="quickAdd('Idli')">Idli</button>
+                    <button class="popular-food-btn" onclick="quickAdd('Sambar')">Sambar</button>
+                    <button class="popular-food-btn" onclick="quickAdd('Hot tea (Garam Chai)')">Hot tea (Garam Chai)</button>
+                </div>
+            </div>
+            
+            <!-- Food Log -->
+            <div class="food-log" id="foodLog">
+                <h3>📝 Today's Food Log</h3>
+                <div id="breakfastSection" class="meal-section">
+                    <div class="meal-title">🌅 Breakfast</div>
+                    <div id="breakfast-foods"></div>
+                </div>
+                <div id="lunchSection" class="meal-section">
+                    <div class="meal-title">☀️ Lunch</div>
+                    <div id="lunch-foods"></div>
+                </div>
+                <div id="dinnerSection" class="meal-section">
+                    <div class="meal-title">🌙 Dinner</div>
+                    <div id="dinner-foods"></div>
+                </div>
+                <div id="snackSection" class="meal-section">
+                    <div class="meal-title">🍿 Snacks</div>
+                    <div id="snack-foods"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = 'http://127.0.0.1:8000/api';
+        
+        // State
+        let dailyLog = [];
+        let calorieGoal = 2000;
+        let totalCalories = 0;
+        
+        // Load data from localStorage
+        function loadData() {
+            const today = new Date().toISOString().split('T')[0];
+            const saved = localStorage.getItem(`calorie-log-${today}`);
+            if (saved) {
+                dailyLog = JSON.parse(saved);
+                updateDisplay();
+            }
+        }
+        
+        // Save data to localStorage
+        function saveData() {
+            const today = new Date().toISOString().split('T')[0];
+            localStorage.setItem(`calorie-log-${today}`, JSON.stringify(dailyLog));
+        }
+        
+        // Add food to log
+        async function addFood() {
+            const dishName = document.getElementById('foodSearch').value.trim();
+            const servings = parseFloat(document.getElementById('servings').value) || 1;
+            const mealType = document.getElementById('mealType').value;
+            
+            if (!dishName) {
+                showError('Please enter a dish name');
+                return;
+            }
+            
+            showLoading(true);
+            hideError();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/search/?dish=${encodeURIComponent(dishName)}`);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error(`Food "${dishName}" not found. Please check the spelling.`);
+                    }
+                    throw new Error(`API error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const actualDishName = Object.keys(data)[0];
+                const nutrition = data[actualDishName];
+                
+                const entry = {
+                    id: Date.now(),
+                    dishName: actualDishName,
+                    servings: servings,
+                    mealType: mealType,
+                    nutrition: nutrition,
+                    calories: (nutrition['Calories (kcal)'] || 0) * servings,
+                    timestamp: new Date().toISOString()
+                };
+                
+                dailyLog.push(entry);
+                saveData();
+                updateDisplay();
+                
+                // Clear form
+                document.getElementById('foodSearch').value = '';
+                document.getElementById('servings').value = '1';
+                
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // Quick add popular food
+        async function quickAdd(dishName) {
+            document.getElementById('foodSearch').value = dishName;
+            await addFood();
+        }
+        
+        // Remove food from log
+        function removeFood(entryId) {
+            dailyLog = dailyLog.filter(entry => entry.id !== entryId);
+            saveData();
+            updateDisplay();
+        }
+        
+        // Update display
+        function updateDisplay() {
+            totalCalories = dailyLog.reduce((total, entry) => total + entry.calories, 0);
+            
+            // Update progress
+            document.getElementById('calorieDisplay').textContent = `${Math.round(totalCalories)} / ${calorieGoal} calories`;
+            
+            const percentage = Math.min((totalCalories / calorieGoal) * 100, 100);
+            document.getElementById('progressFill').style.width = `${percentage}%`;
+            
+            const remaining = Math.max(calorieGoal - totalCalories, 0);
+            if (totalCalories > calorieGoal) {
+                document.getElementById('progressText').textContent = `You've exceeded your goal by ${Math.round(totalCalories - calorieGoal)} calories`;
+                document.getElementById('progressFill').style.background = 'linear-gradient(90deg, #dc3545, #c82333)';
+            } else if (percentage > 80) {
+                document.getElementById('progressText').textContent = `Great job! Only ${Math.round(remaining)} calories remaining`;
+                document.getElementById('progressFill').style.background = 'linear-gradient(90deg, #28a745, #20c997)';
+            } else {
+                document.getElementById('progressText').textContent = `${Math.round(remaining)} calories remaining for today`;
+                document.getElementById('progressFill').style.background = 'linear-gradient(90deg, #ffc107, #fd7e14)';
+            }
+            
+            // Update meal sections
+            ['breakfast', 'lunch', 'dinner', 'snack'].forEach(mealType => {
+                const container = document.getElementById(`${mealType}-foods`);
+                const mealEntries = dailyLog.filter(entry => entry.mealType === mealType);
+                
+                if (mealEntries.length === 0) {
+                    container.innerHTML = '<p style="color: #666; font-style: italic;">No foods added yet</p>';
+                } else {
+                    container.innerHTML = mealEntries.map(entry => `
+                        <div class="food-entry">
+                            <div class="food-info">
+                                <div class="food-name">${entry.dishName}</div>
+                                <div class="food-details">${entry.servings} serving(s)</div>
+                            </div>
+                            <div class="food-calories">${Math.round(entry.calories)} cal</div>
+                            <button class="remove-btn" onclick="removeFood(${entry.id})">Remove</button>
+                        </div>
+                    `).join('');
+                }
+            });
+        }
+        
+        // Utility functions
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+        
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+        
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+            document.getElementById('addBtn').disabled = show;
+        }
+        
+        // Event listeners
+        document.getElementById('foodSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addFood();
+            }
+        });
+        
+        // Initialize
+        loadData();
+        updateDisplay();
+    </script>
+</body>
+</html>

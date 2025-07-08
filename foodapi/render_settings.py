@@ -12,8 +12,10 @@ DEBUG = False
 # Security settings
 ALLOWED_HOSTS = [
     '.onrender.com',
+    '*.onrender.com',
     'localhost',
     '127.0.0.1',
+    '*',  # Temporarily allow all hosts for debugging
 ]
 
 # Database configuration for Render

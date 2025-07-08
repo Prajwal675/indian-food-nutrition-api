@@ -12,7 +12,21 @@ data_dict = df.set_index("Dish Name").T.to_dict()
 
 @api_view(["GET"])
 def home(request):
-    return Response({"message": "Welcome to Indian Food Nutrition API"})
+    return Response({
+        "message": "Welcome to Indian Food Nutrition API",
+        "status": "running",
+        "total_foods": len(data_dict),
+        "endpoints": {
+            "foods_list": "/api/foods/",
+            "search_food": "/api/search/?dish=DISH_NAME",
+            "get_food": "/api/food/DISH_NAME/"
+        },
+        "example_searches": [
+            "/api/search/?dish=Naan",
+            "/api/search/?dish=Chapati/Roti",
+            "/api/search/?dish=Masala dosa"
+        ]
+    })
 
 @api_view(["GET"])
 def list_foods(request):

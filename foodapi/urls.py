@@ -16,8 +16,22 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
+
+def root_view(request):
+    return JsonResponse({
+        'message': 'Indian Food Nutrition API is running!',
+        'endpoints': {
+            'welcome': '/api/',
+            'foods_list': '/api/foods/',
+            'search_food': '/api/search/?dish=DISH_NAME',
+            'get_food': '/api/food/DISH_NAME/'
+        },
+        'example': '/api/search/?dish=Naan'
+    })
 
 urlpatterns = [
+    path('', root_view, name='root'),
     path('admin/', admin.site.urls),
     path('api/', include('nutrition.urls')),
 ]
